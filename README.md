@@ -7,7 +7,7 @@ A web-based PostgreSQL database studio built with TanStack Start, featuring comp
 ## Tech Stack
 
 - **Frontend**: TanStack Start + shadcn/ui
-- **Database**: PostgreSQL (user-configured via DATABASE_URL)
+- **Database**: PostgreSQL (user-configured via DB_URL)
 - **Type Safety**: sqlx-ts (compile-time SQL validation + type generation)
 - **Runtime**: Node.js
 - **Package Manager**: pnpm (recommended)
@@ -45,7 +45,7 @@ spooderdb/
 │       │   ├── tables.sql       # -- @name: getTables, -- @name: getTableSchema
 │       │   ├── select.sql        # -- @name: selectAllFrom{Table}
 │       │   └── execute.sql       # -- @name: runQuery
-│       └── types.ts              # sqlx-ts generated types
+│       └── sqlx.types.ts              # sqlx-ts generated types
 ├── .env.example
 ├── .sqlxrc.json                  # sqlx-ts config
 └── package.json
@@ -63,7 +63,7 @@ pnpm install
 
 # Copy and configure environment
 cp .env.example .env
-# Edit .env and set your DATABASE_URL
+# Edit .env and set your DB_URL
 
 # Generate types from SQL queries
 pnpm sqlx:generate
@@ -76,7 +76,7 @@ pnpm dev
 
 | Variable | Description |
 |----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string (e.g., `postgres://user:pass@localhost:5432/mydb`) |
+| `DB_URL` | PostgreSQL connection string (e.g., `postgres://user:pass@localhost:5432/mydb`) |
 
 ## sqlx-ts Integration
 
@@ -87,7 +87,7 @@ SQL files in `src/lib/sql-queries/` use annotations:
 SELECT * FROM users WHERE active = true;
 ```
 
-Running `pnpm sqlx:generate` validates against DATABASE_URL and generates types in `src/lib/types.ts`.
+Running `pnpm sqlx:generate` validates against DB_URL and generates types in `src/lib/sqlx.types.ts`.
 
 ## API Endpoints
 

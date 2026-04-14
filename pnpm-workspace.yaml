@@ -1,4 +1,5 @@
 onlyBuiltDependencies:
   - esbuild
   - msw
+  - sqlx-ts
   - unrs-resolver

@@ -1,0 +1,15 @@
+{
+  "generate_types": {
+    "enabled": true,
+    "columnNamingConvention": "snake",
+    "outputPath": "./src/lib/sqlx.types.ts"
+  },
+  "connections": {
+    "default": {
+      "DB_TYPE": "postgres",
+      "DB_URL": "${DB_URL}",
+      "POOL_SIZE": 5,
+      "CONNECTION_TIMEOUT": 10
+    }
+  }
+}
