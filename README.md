@@ -2,11 +2,11 @@
 
 ## Overview
 
-A web-based PostgreSQL database studio built with TanStack Start, featuring compile-time SQL validation via sqlx-ts.
+A web-based PostgreSQL database studio built with SpooderDB, featuring compile-time SQL validation via sqlx-ts.
 
 ## Tech Stack
 
-- **Frontend**: TanStack Start + shadcn/ui
+- **Frontend**: SpooderDB + shadcn/ui
 - **Database**: PostgreSQL (user-configured via DB_URL)
 - **Type Safety**: sqlx-ts (compile-time SQL validation + type generation)
 - **Runtime**: Node.js
@@ -74,8 +74,8 @@ pnpm dev
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
+| Variable | Description                                                                     |
+| -------- | ------------------------------------------------------------------------------- |
 | `DB_URL` | PostgreSQL connection string (e.g., `postgres://user:pass@localhost:5432/mydb`) |
 
 ## sqlx-ts Integration
@@ -91,14 +91,14 @@ Running `pnpm sqlx:generate` validates against DB_URL and generates types in `sr
 
 ## API Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/tables` | List all tables |
-| GET | `/api/tables/:name` | Get table schema |
-| GET | `/api/tables/:name/rows` | Paginated SELECT * |
-| POST | `/api/query` | Execute custom SQL |
-| POST | `/api/import` | Import CSV/JSON, create table |
-| GET | `/api/export/:table` | Export as CSV or JSON |
+| Method | Path                     | Description                   |
+| ------ | ------------------------ | ----------------------------- |
+| GET    | `/api/tables`            | List all tables               |
+| GET    | `/api/tables/:name`      | Get table schema              |
+| GET    | `/api/tables/:name/rows` | Paginated SELECT \*           |
+| POST   | `/api/query`             | Execute custom SQL            |
+| POST   | `/api/import`            | Import CSV/JSON, create table |
+| GET    | `/api/export/:table`     | Export as CSV or JSON         |
 
 ## Development
 
