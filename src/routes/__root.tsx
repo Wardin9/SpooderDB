@@ -1,8 +1,8 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
-import { TanStackDevtools } from "@tanstack/react-devtools"
-import { TooltipProvider } from "@/components/ui/tooltip"
+// import { TanStackDevtools } from "@tanstack/react-devtools"
+import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
+// import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 import appCss from "../styles.css?url"
 
@@ -40,7 +40,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <TooltipProvider>
           <SidebarProvider defaultOpen={true}>{children}</SidebarProvider>
         </TooltipProvider>
-        <TanStackDevtools
+        {/* <TanStackDevtools
           config={{
             position: "bottom-right",
           }}
@@ -50,7 +50,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               render: <TanStackRouterDevtoolsPanel />,
             },
           ]}
-        />
+        /> */}
         <Scripts />
       </body>
     </html>

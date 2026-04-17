@@ -33,10 +33,12 @@ export const getTableSchemaFn = createServerFn({ method: "GET" })
   })
 
 export const executeQueryFn = createServerFn({ method: "POST" })
-  .inputValidator((data: { sql: string }) => data)
+  .inputValidator((data: { sql: string; allowDestructive?: boolean }) => data)
   .handler(async ({ data }): Promise<ExecuteQueryResult> => {
-    if (isDestructiveQuery(data.sql)) {
-      throw new Error("Destructive queries are not allowed")
+    if (data.allowDestructive !== true && isDestructiveQuery(data.sql)) {
+      throw new Error(
+        "Destructive queries are not allowed. Toggle the switch to allow."
+      )
     }
     return await executeQuery(data.sql)
   })

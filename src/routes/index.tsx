@@ -15,6 +15,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 import {
   getTableRowsFn,
   getTableSchemaFn,
@@ -39,6 +40,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [query, setQuery] = useState("")
   const [queryError, setQueryError] = useState<string | null>(null)
+  const [allowDestructive, setAllowDestructive] = useState(false)
 
   const handleTableClick = async (tableName: string) => {
     setSelectedTable(tableName)
@@ -66,23 +68,26 @@ function App() {
         data: { sql: query },
       })
 
-      if (isDestructive) {
+      if (isDestructive && !allowDestructive) {
         setQueryError(
-          "⚠️ This appears to be a destructive query. Please verify before executing."
+          "⚠️ This is a destructive query. Toggle the switch above to allow."
         )
         return
       }
 
-      const result = await executeQueryFn({ data: { sql: query } })
+      const result = await executeQueryFn({
+        data: { sql: query, allowDestructive },
+      })
       if (result.rows) {
-
         setTableRows(result.rows)
         // Derive schema from query results
         if (result.rows.length > 0) {
-          const schema = Object.entries(result.rows[0]).map(([column_name, value]) => ({
-            column_name,
-            data_type: typeof value,
-          }))
+          const schema = Object.entries(result.rows[0]).map(
+            ([column_name, value]) => ({
+              column_name,
+              data_type: typeof value,
+            })
+          )
           setTableSchema(schema)
         } else {
           setTableSchema([])
@@ -103,9 +108,12 @@ function App() {
     <>
       <Sidebar>
         <SidebarHeader>
-          <div className="flex items-center gap-2 px-2 py-1">
-            <Database className="h-5 w-5" />
-            <span className="font-semibold">SpooderDB</span>
+          <div className="flex items-center justify-between px-2 py-4">
+            <div className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              <span className="font-semibold text-2xl">SpooderDB</span>
+            </div>
+
           </div>
           <div className="px-2 pb-2">
             <textarea
@@ -122,8 +130,8 @@ function App() {
             )}
             <Button
               onClick={handleExecuteQuery}
-              className="mt-2 w-full"
-              size="sm"
+              className="mt-2 w-full cursor-pointer p-2"
+              size="icon-lg"
             >
               <Play className="mr-2 h-4 w-4" />
               Execute
@@ -153,16 +161,29 @@ function App() {
       </Sidebar>
       <SidebarInset>
         <div className="p-4">
-          <div className="mb-4 flex items-center gap-2">
-            <SidebarTrigger />
-            {selectedTable ? (
-              <div className="flex items-center gap-2">
-                <ChevronRight className="h-4 w-4" />
-                <h1 className="text-xl font-semibold">{selectedTable}</h1>
-              </div>
-            ) : (
-              <h1 className="text-xl font-semibold">Select a table</h1>
-            )}
+          <div className="mb-4 flex items-center gap-2 justify-between border-b border-border py-4">
+            <div className="flex gap-2 items-center justify-around">
+              <SidebarTrigger />
+              {selectedTable ? (
+                <div className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4" />
+                  <h1 className="text-xl font-semibold">{selectedTable}</h1>
+                </div>
+              ) : (
+                <h1 className="text-xl font-semibold">Select a table</h1>
+              )}
+            </div>
+            <div className="flex items-center gap-2 text-md font-bold text-destructive">
+              <label className="text-muted-foreground cursor-pointer text-red-600 uppercase" htmlFor="allowDestructive">Allow destructive</label>
+              <Switch
+                id="allowDestructive"
+                color="rgb(255, 0, 0)"
+                className="cursor-pointer"
+                size={"default"}
+                checked={allowDestructive}
+                onCheckedChange={setAllowDestructive}
+              />
+            </div>
           </div>
 
           {!selectedTable ? (
