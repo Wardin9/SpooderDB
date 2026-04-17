@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { ChevronRight, Database, LayoutGrid, Table } from "lucide-react"
+import { ChevronRight, Database, LayoutGrid, Play, Table } from "lucide-react"
 import { useState } from "react"
 import {
   Sidebar,
@@ -14,10 +14,13 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
 import {
   getTableRowsFn,
   getTableSchemaFn,
   getTablesFn,
+  executeQueryFn,
+  checkDestructiveQueryFn,
 } from "@/lib/db.functions"
 
 export const Route = createFileRoute("/")({
@@ -34,6 +37,8 @@ function App() {
   const [tableRows, setTableRows] = useState<unknown[]>([])
   const [tableSchema, setTableSchema] = useState<unknown[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [query, setQuery] = useState("")
+  const [queryError, setQueryError] = useState<string | null>(null)
 
   const handleTableClick = async (tableName: string) => {
     setSelectedTable(tableName)
@@ -52,6 +57,35 @@ function App() {
     }
   }
 
+  const handleExecuteQuery = async () => {
+    if (!query.trim()) return
+    let warned = false
+
+    setQueryError(null)
+    try {
+      const { isDestructive } = await checkDestructiveQueryFn({
+        data: { sql: query },
+      })
+
+      if (isDestructive && !warned) {
+        setQueryError(
+          "⚠️ This appears to be a destructive query. Please verify before executing."
+        )
+        warned = true
+        return
+      }
+
+      const result = await executeQueryFn({ data: { sql: query } })
+      setTableRows(result.rows)
+      setTableSchema([])
+      setSelectedTable("Query Results")
+    } catch (e) {
+      setQueryError(
+        `Error: ${e instanceof Error ? e.message : "Unknown error"}`
+      )
+    }
+  }
+
   return (
     <>
       <Sidebar>
@@ -59,6 +93,28 @@ function App() {
           <div className="flex items-center gap-2 px-2 py-1">
             <Database className="h-5 w-5" />
             <span className="font-semibold">SpooderDB</span>
+          </div>
+          <div className="px-2 pb-2">
+            <textarea
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="SELECT * FROM users"
+              className="w-full rounded-md border border-input bg-background p-2 font-mono text-xs focus:ring-1 focus:ring-ring focus:outline-none"
+              rows={4}
+            />
+            {queryError && (
+              <div className="mt-2 rounded bg-destructive/10 p-2 text-xs text-destructive">
+                {queryError}
+              </div>
+            )}
+            <Button
+              onClick={handleExecuteQuery}
+              className="mt-2 w-full"
+              size="sm"
+            >
+              <Play className="mr-2 h-4 w-4" />
+              Execute
+            </Button>
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -145,6 +201,10 @@ function App() {
               <div>
                 <h2 className="mb-2 text-sm font-medium">
                   Data ({tableRows.length} rows)
+                  {tableRows.map((r, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: <it's alright>
+                    <p key={i}>{JSON.stringify(r)}</p>
+                  ))}
                 </h2>
                 <div className="max-h-[60vh] overflow-auto rounded-md border">
                   <table className="w-full text-sm">

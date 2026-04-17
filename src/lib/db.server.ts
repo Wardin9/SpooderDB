@@ -1,7 +1,29 @@
 import { env } from "@/env/server"
 import pg, { type QueryResultRow } from "pg"
 
-const { Pool } = pg
+const DESTRUCTIVE_KEYWORDS = [
+  "drop",
+  "truncate",
+  "delete",
+  "alter",
+  "create",
+  "insert",
+  "update",
+  "grant",
+  "revoke",
+  "begin",
+  "commit",
+  "rollback",
+]
+
+export function isDestructiveQuery(sql: string): boolean {
+  const normalized = sql.toLowerCase().trim()
+  return DESTRUCTIVE_KEYWORDS.some((keyword) => normalized.startsWith(keyword))
+}
+
+export function sanitizeTableName(name: string): string {
+  return name.replace(/[^a-zA-Z0-9_]/g, "")
+}
 
 let pool: pg.Pool | null = null
 
@@ -10,7 +32,7 @@ function getPool(): pg.Pool {
     if (!env.DB_URL) {
       throw new Error("DB_URL environment variable is not set")
     }
-    pool = new Pool({
+    pool = new pg.Pool({
       connectionString: env.DB_URL,
     })
   }
@@ -33,7 +55,9 @@ export async function getTables(): Promise<string[]> {
   const result = await query<{ table_name: string }>(
     `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name`
   )
-  return result.rows.map((r) => r.table_name).filter((t) => !t.startsWith("pg_"))
+  return result.rows
+    .map((r) => r.table_name)
+    .filter((t) => !t.startsWith("pg_"))
 }
 
 export async function getTableRows(
@@ -59,4 +83,19 @@ export async function getTableSchema(
     [tableName]
   )
   return result.rows
+}
+
+export interface ExecuteQueryResult {
+  rows: QueryResultRow[]
+  rowCount: number
+  command: string
+}
+
+export async function executeQuery(sql: string): Promise<ExecuteQueryResult> {
+  const result = await query(sql)
+  return {
+    rows: result.rows,
+    rowCount: result.rowCount ?? 0,
+    command: result.command,
+  }
 }
