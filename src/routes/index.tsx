@@ -59,7 +59,6 @@ function App() {
 
   const handleExecuteQuery = async () => {
     if (!query.trim()) return
-    let warned = false
 
     setQueryError(null)
     try {
@@ -67,17 +66,31 @@ function App() {
         data: { sql: query },
       })
 
-      if (isDestructive && !warned) {
+      if (isDestructive) {
         setQueryError(
           "⚠️ This appears to be a destructive query. Please verify before executing."
         )
-        warned = true
         return
       }
 
       const result = await executeQueryFn({ data: { sql: query } })
-      setTableRows(result.rows)
-      setTableSchema([])
+      if (result.rows) {
+
+        setTableRows(result.rows)
+        // Derive schema from query results
+        if (result.rows.length > 0) {
+          const schema = Object.entries(result.rows[0]).map(([column_name, value]) => ({
+            column_name,
+            data_type: typeof value,
+          }))
+          setTableSchema(schema)
+        } else {
+          setTableSchema([])
+        }
+      } else {
+        setTableRows([])
+        setTableSchema([])
+      }
       setSelectedTable("Query Results")
     } catch (e) {
       setQueryError(
@@ -201,10 +214,6 @@ function App() {
               <div>
                 <h2 className="mb-2 text-sm font-medium">
                   Data ({tableRows.length} rows)
-                  {tableRows.map((r, i) => (
-                    // biome-ignore lint/suspicious/noArrayIndexKey: <it's alright>
-                    <p key={i}>{JSON.stringify(r)}</p>
-                  ))}
                 </h2>
                 <div className="max-h-[60vh] overflow-auto rounded-md border">
                   <table className="w-full text-sm">
